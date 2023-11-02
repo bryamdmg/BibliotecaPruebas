@@ -54,7 +54,7 @@ public class BibliotecaApp {
         }
     }
 
-    private static void altaLibro(LibroDAO libroDAO, Scanner scanner) throws SQLException {
+    private static void altaLibro(LibroDAO libroDAO, Scanner scanner) {
         System.out.println("Alta de Libro");
 
         System.out.print("Ingrese el título del libro: ");
@@ -77,12 +77,17 @@ public class BibliotecaApp {
         }
     }
 
-    private static void consultaLibro(LibroDAO libroDAO, Scanner scanner) throws SQLException {
+    private static void consultaLibro(LibroDAO libroDAO, Scanner scanner) {
         System.out.println("Consulta de Libro");
         System.out.print("Ingrese el ID del libro a consultar: ");
         int id = scanner.nextInt();
         scanner.nextLine();
-        Libro libro = libroDAO.consultaLibro(id);
+        Libro libro = null;
+        try {
+            libro = libroDAO.consultaLibro(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         if (libro == null) {
             System.out.println("El libro con ID " + id + " no existe en la biblioteca.");
@@ -96,12 +101,17 @@ public class BibliotecaApp {
         System.out.println("Estado: " + libro.getEstado());
     }
 
-    private static void prestamoLibro(PrestamoDAO prestamoDAO, LibroDAO libroDAO, Scanner scanner) throws SQLException {
+    private static void prestamoLibro(PrestamoDAO prestamoDAO, LibroDAO libroDAO, Scanner scanner) {
         System.out.println("Préstamo de Libro");
         System.out.print("Ingrese el ID del libro a prestar: ");
         int libroId = scanner.nextInt();
         scanner.nextLine();
-        Libro libro = libroDAO.consultaLibro(libroId);
+        Libro libro = null;
+        try {
+            libro = libroDAO.consultaLibro(libroId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         if (libro == null) {
             System.out.println("El libro con ID " + libroId + " no existe en la biblioteca.");
@@ -126,7 +136,7 @@ public class BibliotecaApp {
         try {
             fechaPrestamo = dateFormat.parse(fechaPrestamoStr);
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         if (libro.isRestringido()) {
@@ -162,7 +172,7 @@ public class BibliotecaApp {
         return calendar.getTime();
     }
 
-    private static void recepcionLibro(PrestamoDAO prestamoDAO, Scanner scanner) throws SQLException {
+    private static void recepcionLibro(PrestamoDAO prestamoDAO, Scanner scanner) {
         System.out.println("Recepción de Libro");
 
         System.out.print("Ingrese el ID del libro a recibir: ");
@@ -172,7 +182,12 @@ public class BibliotecaApp {
         ingresarFechaDevolucion(libroId, scanner);
 
         LibroDAO libroDAO = new LibroDAO();
-        Libro libro = libroDAO.consultaLibro(libroId);
+        Libro libro = null;
+        try {
+            libro = libroDAO.consultaLibro(libroId);
+        } catch (SQLException e) {
+            e.printStackTrace();;
+        }
 
         if (libro == null) {
             System.out.println("El libro con ID " + libroId + " no existe en la biblioteca.");
@@ -187,7 +202,12 @@ public class BibliotecaApp {
         System.out.print("Ingrese el ID del prestamo: ");
         int prestamoId = scanner.nextInt();
         scanner.nextLine();
-        Prestamo prestamo = prestamoDAO.obtenerPrestamo(prestamoId);
+        Prestamo prestamo = null;
+        try {
+            prestamo = prestamoDAO.obtenerPrestamo(prestamoId);
+        } catch (SQLException e) {
+            e.printStackTrace();;
+        }
 
         Date fechaDevolucion = prestamo.getFecha_devolucion();
 
@@ -198,7 +218,11 @@ public class BibliotecaApp {
 
         if (Validaciones.esLibroPerdido(fechaDevolucion)) {
             System.out.println("El libro se considera perdido.");
-            libroDAO.marcarLibroComoPerdido(libroId);
+            try {
+                libroDAO.marcarLibroComoPerdido(libroId);
+            } catch (SQLException e) {
+                e.printStackTrace();;
+            }
             return;
         }
 

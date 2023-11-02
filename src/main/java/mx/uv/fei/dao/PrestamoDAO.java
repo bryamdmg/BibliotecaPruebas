@@ -19,9 +19,8 @@ public class PrestamoDAO implements IPrestamo {
 
         try {
             connection = databaseManager.getConnection();
-            connection.setAutoCommit(false); // Iniciar transacción
+            connection.setAutoCommit(false);
 
-            // Paso 1: Verificar si el libro está disponible para préstamo
             String verificarDisponibilidadSQL = "SELECT estado FROM Libros WHERE id = ?";
             String estadoLibro;
             try (PreparedStatement verificarDisponibilidadStmt = connection.prepareStatement(verificarDisponibilidadSQL)) {
@@ -38,7 +37,6 @@ public class PrestamoDAO implements IPrestamo {
                 throw new SQLException("El libro no está disponible para préstamo.");
             }
 
-            // Paso 2: Calcular la fecha de devolución y el estado del libro
             String estado;
             Date fechaDevolucion;
 
@@ -54,7 +52,7 @@ public class PrestamoDAO implements IPrestamo {
                             fechaDevolucion = fechaPrestamo;
                         } else {
                             estado = "prestado";
-                            fechaDevolucion = new Date(fechaPrestamo.getTime() + (3 * 24 * 60 * 60 * 1000)); // 3 días de préstamo
+                            fechaDevolucion = new Date(fechaPrestamo.getTime() + (3 * 24 * 60 * 60 * 1000));
                         }
                     } else {
                         throw new SQLException("Libro no encontrado.");
@@ -62,7 +60,6 @@ public class PrestamoDAO implements IPrestamo {
                 }
             }
 
-            // Paso 3: Realizar el préstamo del libro
             String insertPrestamoSQL = "INSERT INTO Prestamos (libro_id, fecha_prestamo, fecha_devolucion) VALUES (?, ?, ?)";
             try (PreparedStatement insertPrestamoStmt = connection.prepareStatement(insertPrestamoSQL)) {
                 insertPrestamoStmt.setInt(1, libroId);
@@ -71,7 +68,6 @@ public class PrestamoDAO implements IPrestamo {
                 insertPrestamoStmt.executeUpdate();
             }
 
-            // Paso 4: Actualizar el estado del libro
             String actualizarEstadoLibroSQL = "UPDATE Libros SET estado = ? WHERE id = ?";
             try (PreparedStatement actualizarEstadoLibroStmt = connection.prepareStatement(actualizarEstadoLibroSQL)) {
                 actualizarEstadoLibroStmt.setString(1, estado);
@@ -79,15 +75,14 @@ public class PrestamoDAO implements IPrestamo {
                 actualizarEstadoLibroStmt.executeUpdate();
             }
 
-            // Confirmar la transacción
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
-                connection.rollback(); // Revertir la transacción en caso de error
+                connection.rollback();
             }
         } finally {
             if (connection != null) {
-                connection.setAutoCommit(true); // Restablecer el modo de autocommit
+                connection.setAutoCommit(true);
                 connection.close();
             }
         }
@@ -100,9 +95,8 @@ public class PrestamoDAO implements IPrestamo {
 
         try {
             connection = databaseManager.getConnection();
-            connection.setAutoCommit(false); // Iniciar transacción
+            connection.setAutoCommit(false);
 
-            // Paso 1: Verificar el estado del libro y obtener la fecha de devolución
             String verificarEstadoSQL = "SELECT estado FROM Libros WHERE id = ?";
             String estado;
             Date fechaDevolucion;
@@ -131,30 +125,27 @@ public class PrestamoDAO implements IPrestamo {
                 }
             }
 
-            // Paso 2: Actualizar el estado del libro a disponible
             String actualizarEstadoLibroSQL = "UPDATE Libros SET estado = 'disponible' WHERE id = ?";
             try (PreparedStatement actualizarEstadoLibroStmt = connection.prepareStatement(actualizarEstadoLibroSQL)) {
                 actualizarEstadoLibroStmt.setInt(1, libroId);
                 actualizarEstadoLibroStmt.executeUpdate();
             }
 
-            // Paso 3: Eliminar el registro de préstamo
             String eliminarPrestamoSQL = "DELETE FROM Prestamos WHERE libro_id = ?";
             try (PreparedStatement eliminarPrestamoStmt = connection.prepareStatement(eliminarPrestamoSQL)) {
                 eliminarPrestamoStmt.setInt(1, libroId);
                 eliminarPrestamoStmt.executeUpdate();
             }
 
-            // Confirmar la transacción
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
-                connection.rollback(); // Revertir la transacción en caso de error
+                connection.rollback();
             }
-            throw e; // Relanzar la excepción para notificar el error al usuario
+            throw e;
         } finally {
             if (connection != null) {
-                connection.setAutoCommit(true); // Restablecer el modo de autocommit
+                connection.setAutoCommit(true);
                 connection.close();
             }
         }
@@ -166,9 +157,8 @@ public class PrestamoDAO implements IPrestamo {
         Connection connection = databaseManager.getConnection();
 
         try {
-            connection.setAutoCommit(false); // Iniciar transacción
+            connection.setAutoCommit(false);
 
-            // Paso 1: Verificar si el libro está en estado de préstamo
             String verificarEstadoSQL = "SELECT estado FROM Libros WHERE id = ?";
             String estado;
             try (PreparedStatement verificarEstadoStmt = connection.prepareStatement(verificarEstadoSQL)) {
@@ -185,7 +175,6 @@ public class PrestamoDAO implements IPrestamo {
                 throw new SQLException("El libro no está en estado de préstamo.");
             }
 
-            // Paso 2: Actualizar la fecha de devolución del préstamo
             String actualizarFechaDevolucionSQL = "UPDATE Prestamos SET fecha_devolucion = ? WHERE libro_id = ?";
             try (PreparedStatement actualizarFechaDevolucionStmt = connection.prepareStatement(actualizarFechaDevolucionSQL)) {
                 actualizarFechaDevolucionStmt.setDate(1, new java.sql.Date(nuevaFechaDevolucion.getTime()));
@@ -193,16 +182,15 @@ public class PrestamoDAO implements IPrestamo {
                 actualizarFechaDevolucionStmt.executeUpdate();
             }
 
-            // Confirmar la transacción
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
-                connection.rollback(); // Revertir la transacción en caso de error
+                connection.rollback();
             }
-            throw e; // Relanzar la excepción para notificar el error al usuario
+            throw e;
         } finally {
             if (connection != null) {
-                connection.setAutoCommit(true); // Restablecer el modo de autocommit
+                connection.setAutoCommit(true);
                 connection.close();
             }
         }

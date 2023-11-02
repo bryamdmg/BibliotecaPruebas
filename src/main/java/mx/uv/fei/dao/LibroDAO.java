@@ -60,7 +60,6 @@ public class LibroDAO implements ILibro{
 
         try {
 
-            // Paso 1: Verificar el estado del libro y obtener la fecha de devolución
             String verificarEstadoSQL = "SELECT estado FROM Libros WHERE id = ?";
             String estado;
             Date fechaDevolucion;
@@ -90,19 +89,15 @@ public class LibroDAO implements ILibro{
                 }
             }
 
-            // Paso 2: Calcular la fecha actual
             Date fechaActual = new Date();
 
-            // Paso 3: Verificar si el libro es perdido
             Calendar calendarFechaDevolucion = Calendar.getInstance();
             calendarFechaDevolucion.setTime(fechaDevolucion);
-            calendarFechaDevolucion.add(Calendar.MONTH, 1); // Agregar un mes
+            calendarFechaDevolucion.add(Calendar.MONTH, 1);
 
             if (fechaActual.after(calendarFechaDevolucion.getTime())) {
-                // El libro se considera perdido
                 estado = "perdido";
 
-                // Paso 4: Actualizar el estado del libro
                 String actualizarEstadoLibroSQL = "UPDATE Libros SET estado = ? WHERE id = ?";
                 try (PreparedStatement actualizarEstadoLibroStmt = connection.prepareStatement(actualizarEstadoLibroSQL)) {
                     actualizarEstadoLibroStmt.setString(1, estado);
@@ -111,16 +106,15 @@ public class LibroDAO implements ILibro{
                 }
             }
 
-            // Confirmar la transacción
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
-                connection.rollback(); // Revertir la transacción en caso de error
+                connection.rollback();
             }
-            throw e; // Relanzar la excepción para notificar el error al usuario
+            throw e;
         } finally {
             if (connection != null) {
-                connection.setAutoCommit(true); // Restablecer el modo de autocommit
+                connection.setAutoCommit(true);
                 connection.close();
             }
         }
