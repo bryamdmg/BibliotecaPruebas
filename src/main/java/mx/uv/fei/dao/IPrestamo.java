@@ -6,4 +6,5 @@ import java.util.Date;
 public interface IPrestamo {
     void prestamoLibro(int libroId, Date fechaPrestamo) throws SQLException;
     void recepcionLibro(int libroId) throws SQLException;
+    void ingresarFechaDevolucion(int libroId, Date nuevaFechaDevolucion) throws SQLException;
 }

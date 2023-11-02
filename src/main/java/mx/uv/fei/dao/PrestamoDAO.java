@@ -156,5 +156,53 @@ public class PrestamoDAO implements IPrestamo {
             }
         }
     }
+
+    @Override
+    public void ingresarFechaDevolucion(int libroId, Date nuevaFechaDevolucion) throws SQLException {
+        DatabaseManager databaseManager = new DatabaseManager();
+        Connection connection = databaseManager.getConnection();
+
+        try {
+            connection.setAutoCommit(false); // Iniciar transacción
+
+            // Paso 1: Verificar si el libro está en estado de préstamo
+            String verificarEstadoSQL = "SELECT estado FROM Libros WHERE id = ?";
+            String estado;
+            try (PreparedStatement verificarEstadoStmt = connection.prepareStatement(verificarEstadoSQL)) {
+                verificarEstadoStmt.setInt(1, libroId);
+                try (ResultSet resultSet = verificarEstadoStmt.executeQuery()) {
+                    if (!resultSet.next()) {
+                        throw new SQLException("Libro no encontrado.");
+                    }
+                    estado = resultSet.getString("estado");
+                }
+            }
+
+            if (!estado.equals("prestado")) {
+                throw new SQLException("El libro no está en estado de préstamo.");
+            }
+
+            // Paso 2: Actualizar la fecha de devolución del préstamo
+            String actualizarFechaDevolucionSQL = "UPDATE Prestamos SET fecha_devolucion = ? WHERE libro_id = ?";
+            try (PreparedStatement actualizarFechaDevolucionStmt = connection.prepareStatement(actualizarFechaDevolucionSQL)) {
+                actualizarFechaDevolucionStmt.setDate(1, new java.sql.Date(nuevaFechaDevolucion.getTime()));
+                actualizarFechaDevolucionStmt.setInt(2, libroId);
+                actualizarFechaDevolucionStmt.executeUpdate();
+            }
+
+            // Confirmar la transacción
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                connection.rollback(); // Revertir la transacción en caso de error
+            }
+            throw e; // Relanzar la excepción para notificar el error al usuario
+        } finally {
+            if (connection != null) {
+                connection.setAutoCommit(true); // Restablecer el modo de autocommit
+                connection.close();
+            }
+        }
+    }
 }
 
