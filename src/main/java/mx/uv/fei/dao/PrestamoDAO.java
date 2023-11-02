@@ -1,10 +1,13 @@
 package main.java.mx.uv.fei.dao;
 
 import main.java.mx.uv.fei.dataaccess.DatabaseManager;
+import main.java.mx.uv.fei.logic.Libro;
+import main.java.mx.uv.fei.logic.Prestamo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
 import java.sql.ResultSet;
 
@@ -203,6 +206,30 @@ public class PrestamoDAO implements IPrestamo {
                 connection.close();
             }
         }
+    }
+
+    @Override
+    public Prestamo obtenerPrestamo(int id) throws SQLException {
+        Prestamo prestamo = new Prestamo();
+        String sql = "SELECT id, libro_id, fecha_prestamo, fecha_devolucion FROM prestamos WHERE id = ?";
+        DatabaseManager databaseManager = new DatabaseManager();
+        Connection connection = databaseManager.getConnection();
+
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        try {
+            if (resultSet.next()) {
+                prestamo.setId(resultSet.getInt("id"));
+                prestamo.setLibro_id(resultSet.getInt("libro_id"));
+                prestamo.setFecha_prestamo(resultSet.getDate("fecha_prestamo"));
+                prestamo.setFecha_devolucion(resultSet.getDate("fecha_devolucion"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return prestamo;
     }
 }
 

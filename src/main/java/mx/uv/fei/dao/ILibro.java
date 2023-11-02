@@ -6,6 +6,6 @@ import java.sql.SQLException;
 
 public interface ILibro {
     void altaLibro(Libro libro) throws SQLException;
-
     Libro consultaLibro(int id) throws SQLException;
+    void marcarLibroComoPerdido(int libroId) throws SQLException;
 }
